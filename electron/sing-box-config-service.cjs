@@ -1344,6 +1344,10 @@ function buildProxyDnsBlock(directDomains = [], vpnDns = null) {
       {
         tag: 'dns-direct',
         type: 'local',
+        // Pinned to the direct outbound on purpose. With auto_route capturing
+        // everything, an undetoured bootstrap query is dialled through
+        // route.final and deadlocks against the tunnel it is meant to bring up.
+        detour: 'direct',
       },
     ],
     rules: buildDnsRules(directDomains),
@@ -1453,6 +1457,14 @@ function buildTunConfig(
   ).map((value) => String(value ?? '').trim()).filter(Boolean))).slice(0, 500)
 
   const rules = [
+    // Sniff first. `protocol` is only known once a connection has been sniffed,
+    // so a hijack rule placed above this one never matches, and DNS escapes as
+    // plain UDP to whatever resolver Windows was using. On a VLESS outbound
+    // with the vision flow that UDP has nowhere to go, which leaves a tunnel
+    // that reports itself up while resolving nothing.
+    {
+      action: 'sniff',
+    },
     // Capture DNS before routing domain rules. Without this, Windows resolves a
     // bypass host outside sing-box and TUN only sees the resulting IP, so the
     // Direct Sites domain rule can never match.
@@ -1460,8 +1472,10 @@ function buildTunConfig(
       protocol: 'dns',
       action: 'hijack-dns',
     },
+    // Belt and braces for queries that arrive unsniffable.
     {
-      action: 'sniff',
+      port: 53,
+      action: 'hijack-dns',
     },
     {
       ip_is_private: true,
@@ -1489,7 +1503,7 @@ function buildTunConfig(
         mtu: 1400,
         auto_route: true,
         strict_route: false,
-        stack: 'system',
+        stack: 'mixed',
       },
       {
         type: 'mixed',
@@ -1521,6 +1535,7 @@ function buildTunConfig(
       rules,
       final: 'proxy',
       auto_detect_interface: true,
+      default_domain_resolver: 'dns-direct',
     },
 
     experimental: { clash_api: { external_controller: `127.0.0.1:${clashApiPort}` } },

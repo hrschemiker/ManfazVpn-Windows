@@ -6102,8 +6102,9 @@ textarea:hover {
   padding: 0 20px;
   border: 0;
   border-radius: 11px;
-  background: var(--teal);
-  color: #04211d;
+  /* Deepened from the flat brand teal so white text clears contrast on it. */
+  background: linear-gradient(135deg, #0f9c8b, #0b7d70);
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -6123,8 +6124,17 @@ textarea:hover {
 .guided-apply .connect-progress-spinner {
   width: 14px;
   height: 14px;
-  border-color: rgba(4, 33, 29, 0.32);
-  border-top-color: #04211d;
+  border-color: rgba(255, 255, 255, 0.36);
+  border-top-color: #ffffff;
+}
+
+/* In Persian the row runs right to left, which put the primary action on the
+   far right where it read as an afterthought. Reversing the main axis lays the
+   row out left to right, so the button lands on the left and the note follows
+   it, while the card's text stays right aligned as it should. */
+[dir="rtl"] .guided-actions {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 
 .guided-warn {

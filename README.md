@@ -6,9 +6,9 @@
 
 ### A Windows client that refuses to claim a connection it has not proven.
 
-[![Version](https://img.shields.io/badge/version-2.26.0-087f72?style=flat-square)](../../releases/latest)
+[![Version](https://img.shields.io/badge/version-2.27.0-087f72?style=flat-square)](../../releases/latest)
 [![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-0078D4?style=flat-square&logo=windows&logoColor=white)](https://microsoft.com/windows)
-[![sing-box](https://img.shields.io/badge/engine-sing--box%20%2B%20Xray-1f2937?style=flat-square)](https://github.com/SagerNet/sing-box)
+[![Engines](https://img.shields.io/badge/engines-Xray%20%2B%20sing--box-1f2937?style=flat-square)](https://github.com/SagerNet/sing-box)
 [![License](https://img.shields.io/badge/license-MIT-f2c055?style=flat-square)](LICENSE)
 
 ### [⬇ Download the installer for Windows](https://github.com/hrschemiker/ManfazVpn-Windows/releases/latest/download/Manfaz-VPN-Setup-x64.exe)
@@ -40,9 +40,13 @@ Nothing is downloaded on first launch. Both engines are included:
 
 | Component | Role |
 |---|---|
-| sing-box 1.13.12 | Default engine, and the only one that can drive TUN |
-| Xray | Alternative engine for VLESS, VMess, Trojan and Shadowsocks |
+| Xray | Default engine, covering VLESS, VMess, Trojan and Shadowsocks |
+| sing-box 1.13.12 | Second engine, and the only one that can drive TUN, Hysteria2, TUIC and AnyTLS |
 | wintun | Virtual network adapter used by TUN mode |
+
+Xray is selected on a fresh install. Choosing TUN mode, or a protocol only sing-box speaks,
+prompts to switch engines for that connection rather than failing quietly. An installation that
+already had an engine chosen keeps it when it updates.
 
 ## Connection modes
 
@@ -90,6 +94,24 @@ and reports the outcome of each step separately:
 If a step cannot be applied, for instance because arming the kill switch needs Administrator
 rights the app does not have, that step is marked failed with the reason. Nothing is reported
 as done that was not done.
+
+## TUN mode
+
+TUN is the closest thing to a system wide VPN this app offers. sing-box creates a virtual
+adapter, claims the default route, and every application on the machine follows it whether or
+not it knows what a proxy is.
+
+Getting that right on Windows takes more than turning it on. Sniffing runs before any rule
+that matches on protocol, so DNS is recognised and handed to the resolver stack instead of
+leaking out as plain UDP. Queries needed to bring the tunnel up are pinned to the direct
+outbound, because a bootstrap lookup that goes through the tunnel is waiting on the very thing
+it is supposed to establish. Traffic is carried on the mixed stack, which pairs gVisor's TCP
+implementation with the system UDP path and is the combination that actually moves packets on
+Windows. Private address ranges stay on the local network, so printers and routers keep
+working.
+
+The app will not report TUN as connected until it has read a public address through the tunnel
+and seen that it differs from the one you had before connecting.
 
 ## Kill Switch
 

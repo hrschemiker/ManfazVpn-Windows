@@ -144,3 +144,39 @@ jobs:
               Invoke-RestMethod -Headers $headers -Method Delete -Uri "$base/releases/assets/$($asset.id)"
             }
           }
+
+      # A release/v* branch exists only to start this workflow, and older ones
+      # pile up behind it. Delete every temporary branch whose tip is already
+      # contained in the default branch, so nothing is lost by removing it.
+      - name: Remove merged temporary branches
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $headers = @{
+            Authorization = "Bearer $env:GH_TOKEN"
+            Accept        = 'application/vnd.github+json'
+            'User-Agent'  = 'manfaz-release'
+          }
+          $base = "https://api.github.com/repos/${{ github.repository }}"
+          $repo = Invoke-RestMethod -Headers $headers -Uri $base
+          $default = $repo.default_branch
+
+          $branches = Invoke-RestMethod -Headers $headers -Uri "$base/branches?per_page=100"
+          foreach ($branch in $branches) {
+            if ($branch.name -eq $default) { continue }
+            if ($branch.name -notlike 'release/*' -and $branch.name -notlike 'claude/*') { continue }
+
+            # compare returns "behind" or "identical" when the branch adds nothing
+            # that the default branch does not already have.
+            $cmp = Invoke-RestMethod -Headers $headers `
+              -Uri "$base/compare/$default...$($branch.name)"
+            if ($cmp.ahead_by -eq 0) {
+              Write-Host "deleting merged branch: $($branch.name)"
+              Invoke-RestMethod -Headers $headers -Method Delete `
+                -Uri "$base/git/refs/heads/$($branch.name)"
+            } else {
+              Write-Host "keeping $($branch.name), it is $($cmp.ahead_by) commit(s) ahead"
+            }
+          }

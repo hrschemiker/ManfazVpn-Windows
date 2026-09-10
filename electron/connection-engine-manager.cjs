@@ -1,7 +1,8 @@
 const singBox = require('./sing-box-process-manager.cjs')
 const xray = require('./xray-process-manager.cjs')
 
-let selectedEngine = 'sing-box'
+// Matches the renderer's default for a fresh install.
+let selectedEngine = 'xray'
 let activeEngine = null
 
 function normalizeEngine(value) {

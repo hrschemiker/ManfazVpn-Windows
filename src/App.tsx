@@ -6698,8 +6698,8 @@ function SettingsPage({
               void window.hamidsDeutsch.engine.setPreference(engine)
             }}
           >
-            <option value="sing-box">sing-box · {lang === 'fa' ? 'پیش‌فرض' : 'Default'}</option>
-            <option value="xray">Xray Core · {lang === 'fa' ? 'انتخاب جایگزین' : 'Alternative engine'}</option>
+            <option value="xray">Xray Core · {lang === 'fa' ? 'پیش‌فرض' : 'Default'}</option>
+            <option value="sing-box">sing-box · {lang === 'fa' ? 'موتور دوم' : 'Secondary engine'}</option>
           </select>
         </label>
 
@@ -6709,8 +6709,8 @@ function SettingsPage({
                 ? 'Xray برای VLESS، VMess، Trojan و Shadowsocks استفاده می‌شود. TUN، Hysteria2، TUIC و AnyTLS با هشدار به sing-box نیاز دارند.'
                 : 'Xray handles VLESS, VMess, Trojan, and Shadowsocks. TUN, Hysteria2, TUIC, and AnyTLS require sing-box with confirmation.')
             : (lang === 'fa'
-                ? 'sing-box برای پروتکل‌ها و قابلیت‌های اختصاصی فعال است.'
-                : 'sing-box is active for its exclusive protocols and capabilities.')}
+                ? 'sing-box فعال است. تنها موتوری است که حالت TUN و پروتکل‌های Hysteria2، TUIC و AnyTLS را پشتیبانی می‌کند.'
+                : 'sing-box is active. It is the only engine that supports TUN mode and the Hysteria2, TUIC and AnyTLS protocols.')}
         </div>
 
         <label className="settings-select-field">

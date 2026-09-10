@@ -19,7 +19,9 @@ const STORAGE_KEY =
 
 const DEFAULT_SETTINGS:
   ConnectionSettings = {
-    engine: 'sing-box',
+    // Xray on a fresh install. sing-box stays available and is still the only
+    // engine that can drive TUN, which the connect flow offers to switch to.
+    engine: 'xray',
     mode: 'auto',
     allowFallback: true,
   }
@@ -49,7 +51,9 @@ function readSettings():
           : 'auto'
 
     return {
-      engine: parsed.engine === 'xray' ? 'xray' : 'sing-box',
+      // An explicit stored choice is preserved, so upgrading never moves an
+      // existing installation off the engine it was already using.
+      engine: parsed.engine === 'sing-box' ? 'sing-box' : 'xray',
       mode,
       allowFallback:
         parsed.allowFallback !==

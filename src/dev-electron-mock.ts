@@ -8,7 +8,7 @@ const EMPTY_STATE =
   typeof window !== 'undefined' && window.location.search.includes('empty')
 
 const idleProcess = {
-  engineType: 'sing-box',
+  engineType: 'xray',
   running: false,
   ready: false,
   systemProxyEnabled: false,
@@ -28,7 +28,7 @@ const idleProcess = {
 function resultFor(path: string): ApiValue {
   const exact: Record<string, ApiValue> = {
     'engine.getInfo': {
-      engineType: 'sing-box',
+      engineType: 'xray',
       installed: true,
       healthy: true,
       path: 'development-preview',
